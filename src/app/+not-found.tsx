@@ -22,5 +22,5 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { flex: 1, justifyContent: 'center', padding: 24, gap: 24 },
-  link: { color: '#35845E', fontSize: 16, fontWeight: '700', paddingVertical: 16 },
+  link: { color: '#005B96', fontSize: 16, fontWeight: '700', paddingVertical: 16 },
 });
