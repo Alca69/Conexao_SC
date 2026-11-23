@@ -12,7 +12,13 @@ export type NewsArticle = {
   body: string;
   image: ImageSource;
   readingTime: string;
+  /** Autoria fictícia, apenas para demonstração */
+  author: string;
+  /** Data/hora de publicação em ISO 8601 */
+  publishedAt: string;
 };
+
+type RawArticle = Omit<NewsArticle, 'author' | 'publishedAt'>;
 
 const photos = {
   comunidade: require('../../images/pmf-6.jpeg'),
@@ -24,7 +30,7 @@ const photos = {
 };
 
 // Histórias e iniciativas inventadas exclusivamente para demonstrar o MVP.
-export const news: NewsArticle[] = [
+const rawNews: RawArticle[] = [
   { id: 'acolhimento', category: 'Comunidade', primaryTag: 'Notícias', secondaryTags: ['Comunidade', 'Integração'], city: 'Florianópolis', title: 'Um novo começo: encontro conecta imigrantes à comunidade local', summary: 'Troca de experiências, novos vínculos e espaço para quem está chegando a Santa Catarina.', body: 'Nesta história fictícia, famílias de diferentes países se reúnem em um centro comunitário de Florianópolis para compartilhar experiências sobre a chegada ao estado. O encontro imaginário inclui rodas de conversa, atividades culturais e uma mesa coletiva com receitas trazidas pelos participantes.\n\nA programação de exemplo aproxima quem acaba de chegar de quem já construiu sua rotina na cidade. Entre relatos de adaptação e novas amizades, a comunidade encontra um espaço para se conhecer e trocar histórias.', image: photos.comunidade, readingTime: '3 min' },
   { id: 'portugues', category: 'Educação', primaryTag: 'Notícias', secondaryTags: ['Educação', 'Português'], city: 'Joinville', title: 'Português no dia a dia: aulas imaginárias aproximam culturas', summary: 'Conversas sobre transporte, compras e trabalho fazem parte da proposta de aprendizagem.', body: 'No cenário fictício desta notícia, uma turma de português em Joinville aprende com situações do cotidiano. As atividades incluem conversas em pequenos grupos e leitura de placas e anúncios.\n\nA iniciativa inventada para o MVP valoriza os diferentes idiomas dos participantes. Cada encontro termina com uma troca de expressões e histórias dos países de origem.', image: photos.educacao, readingTime: '2 min' },
   { id: 'trabalho', category: 'Trabalho', primaryTag: 'Notícias', secondaryTags: ['Trabalho', 'Empregabilidade'], city: 'Chapecó', title: 'Feira de talentos celebra experiências profissionais de quem chegou de fora', summary: 'Um evento fictício abre espaço para apresentar habilidades e compartilhar trajetórias.', body: 'Nesta demonstração, profissionais imigrantes participam de uma feira imaginária em Chapecó. Oficinas de apresentação pessoal e conversas sobre trajetórias de trabalho compõem a programação.\n\nO evento de exemplo mostra a diversidade de talentos da comunidade, da gastronomia à tecnologia. Não representa vagas ou inscrições reais.', image: photos.trabalho, readingTime: '3 min' },
@@ -38,6 +44,38 @@ export const news: NewsArticle[] = [
   { id: 'bairro', category: 'Moradia', primaryTag: 'Finanças & Moradia', secondaryTags: ['Moradia', 'Horta', 'Bairro'], city: 'Joinville', title: 'Horta compartilhada transforma quintal em espaço de convivência', summary: 'Uma história fictícia sobre cuidar, aprender e criar vínculos no bairro.', body: 'No cenário desta demonstração, vizinhos de Joinville criam uma pequena horta compartilhada. Cada família contribui com conhecimentos e histórias sobre o cultivo em seu país ou região.\n\nO projeto imaginário aproxima moradores novos e antigos. A publicação foi escrita para exemplificar conteúdos sobre convivência e moradia.', image: photos.moradia, readingTime: '2 min' },
   { id: 'musica', category: 'Cultura', primaryTag: 'Vivência', secondaryTags: ['Cultura', 'Música'], city: 'Chapecó', title: 'Encontro musical mistura ritmos e celebra diferentes origens', summary: 'Uma programação imaginária mostra como a música pode aproximar pessoas.', body: 'Nesta notícia fictícia, um espaço comunitário de Chapecó recebe músicos amadores de diferentes países. O repertório imaginário alterna canções conhecidas e composições próprias.\n\nEntre uma apresentação e outra, os participantes contam a história de seus instrumentos. Não há evento ou ingressos reais associados a esta publicação.', image: photos.cultura, readingTime: '2 min' },
 ];
+
+// Autoria e horários fictícios, gerados em relação ao momento atual para a edição parecer sempre atualizada.
+const authors = ['Redação Conexão SC', 'Marina Duarte', 'Redação Conexão SC', 'Lucas Brandão', 'Helena Voss', 'Redação Conexão SC'];
+const hoursAgo = [2, 5, 9, 20, 30, 46, 52, 75, 98, 120, 150, 190];
+
+export const news: NewsArticle[] = rawNews.map((article, index) => ({
+  ...article,
+  author: authors[index % authors.length],
+  publishedAt: new Date(Date.now() - (hoursAgo[index] ?? 200) * 3_600_000).toISOString(),
+}));
+
+const publishedCopy: Record<LanguageCode, { hours: (n: number) => string; yesterday: string; locale: string }> = {
+  pt: { hours: (n) => `há ${n} h`, yesterday: 'Ontem', locale: 'pt-BR' },
+  es: { hours: (n) => `hace ${n} h`, yesterday: 'Ayer', locale: 'es-ES' },
+  en: { hours: (n) => `${n}h ago`, yesterday: 'Yesterday', locale: 'en-GB' },
+};
+
+/** "há 3 h", "Ontem" ou "18 nov." conforme a idade da matéria. */
+export function formatPublished(iso: string, language: LanguageCode): string {
+  const copy = publishedCopy[language];
+  const hours = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 3_600_000));
+  if (hours < 24) return copy.hours(hours);
+  if (hours < 48) return copy.yesterday;
+  return new Date(iso).toLocaleDateString(copy.locale, { day: 'numeric', month: 'short' });
+}
+
+/** Data de hoje por extenso, para o cabeçalho de jornal. */
+export function formatToday(language: LanguageCode): string {
+  const text = new Date().toLocaleDateString(publishedCopy[language].locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 
 export const primaryCategories = ['Todas', 'Notícias', 'Finanças & Moradia', 'Vivência', 'Vida pública'] as const;
 export const secondaryCategories = [
