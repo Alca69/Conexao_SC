@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "conexao-sc",
+    "name": "Conexão SC",
     "slug": "conexao-sc",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,11 @@
     "scheme": "conexaosc",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "br.com.conexaosc.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "br.com.conexaosc.app",
       "adaptiveIcon": {
         "backgroundColor": "#DCEFF7",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -41,6 +43,17 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "d8af2a3c-ba5e-4594-807b-55498e66f3ff"
+      }
+    },
+    "owner": "brunogsr"
   }
 }
